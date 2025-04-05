@@ -108,12 +108,13 @@
 
     <script>
         function checkBypass() {
-            let sessionValid = sessionStorage.getItem("checkpoint_completed");
+            const urlParams = new URLSearchParams(window.location.search);
+            const isVerified = urlParams.get("verified") === "1";
             const errorMsg = document.getElementById("errorMsg");
             const getKeyBtn = document.getElementById("getKeyBtn");
             const title = document.getElementById("pageTitle");
 
-            if (!sessionValid) {
+            if (!isVerified) {
                 errorMsg.style.display = "block";
                 getKeyBtn.style.display = "none";
                 title.innerText = "Keysystem Failed";
