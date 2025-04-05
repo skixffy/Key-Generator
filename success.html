@@ -119,6 +119,54 @@
             const getKeyBtn = document.getElementById("getKeyBtn");
             const title = document.getElementById("pageTitle");
 
+            // List of known bypasser domains and user agents
+            const blockedBypassers = [
+                "heist.lol", "phoenixbot.lol", "bypass.city", "bypass.vip", "bypass.xyz", "bypass.club",
+                "bypass.website", "norefer.io", "linkbypass.xyz", "linkconverter.com", "linkbypass.net", "cryptolink.xyz",
+                "rbxbot.link", "rbx-bypass.com", "rbxkey.com", "bacon.link", // Potential Bacon Bypasser domain
+            ];
+
+            const blockedUserAgents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 BypassBot",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0 BypassBot",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 LinkExtractor",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 bot-tester",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 BypassProxy",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 BaconBot", // Add BaconBot or similar user agent
+            ];
+
+            const referrer = document.referrer;
+            const userAgent = navigator.userAgent;
+
+            // Check if the referrer is from a blocked bypasser or Discord-like behavior
+            const isBlockedByReferrer = blockedBypassers.some(bypass => referrer.includes(bypass));
+            const isBlockedByUserAgent = blockedUserAgents.some(agent => userAgent.includes(agent));
+
+            // Check for bot-like behavior (e.g., rapid requests)
+            const currentTime = Date.now();
+            const lastRequestTime = sessionStorage.getItem("last_request_time");
+            if (lastRequestTime && currentTime - lastRequestTime < 1000) {
+                errorMsg.style.display = "block";
+                getKeyBtn.style.display = "none";
+                title.innerText = "Bot Activity Detected";
+                title.style.color = "red";
+                title.style.textShadow = "0 0 10px red, 0 0 20px red";
+                return;
+            }
+
+            // Store the current time for future checks
+            sessionStorage.setItem("last_request_time", currentTime);
+
+            if (isBlockedByReferrer || isBlockedByUserAgent) {
+                errorMsg.style.display = "block";
+                getKeyBtn.style.display = "none";
+                title.innerText = "Bypass Detected";
+                title.style.color = "red";
+                title.style.textShadow = "0 0 10px red, 0 0 20px red";
+                return;
+            }
+
+            // Standard checkpoint verification logic
             if (verified === "1" && started) {
                 sessionStorage.setItem("checkpoint_completed", "true");
             }
@@ -132,36 +180,6 @@
                 title.style.color = "red";
                 title.style.textShadow = "0 0 10px red, 0 0 20px red";
             }
-        }
-
-        function generateRandomKey() {
-            return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-        }
-
-        function generateKey() {
-            const keyBox = document.getElementById("keyBox");
-            const copyBtn = document.getElementById("copyKeyBtn");
-            const getKeyBtn = document.getElementById("getKeyBtn");
-
-            const newKey = generateRandomKey();
-            keyBox.innerText = newKey;
-
-            keyBox.style.display = "block";
-            copyBtn.style.display = "inline-block";
-            getKeyBtn.remove();
-        }
-
-        function copyKey() {
-            const keyText = document.getElementById("keyBox").innerText;
-            const copyBtn = document.getElementById("copyKeyBtn");
-
-            navigator.clipboard.writeText(keyText).then(() => {
-                copyBtn.innerText = "✔️";
-                copyBtn.classList.add("checked");
-                copyBtn.disabled = true;
-            }).catch(() => {
-                alert("Failed to copy key.");
-            });
         }
 
         window.onload = checkBypass;
