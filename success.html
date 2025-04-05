@@ -107,14 +107,25 @@
     </div>
 
     <script>
-        function checkBypass() {
+        function getQueryParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
-            const isVerified = urlParams.get("verified") === "1";
+            return urlParams.get(param);
+        }
+
+        function checkBypass() {
+            const verified = getQueryParam("verified");
+            const started = sessionStorage.getItem("checkpoint_started");
             const errorMsg = document.getElementById("errorMsg");
             const getKeyBtn = document.getElementById("getKeyBtn");
             const title = document.getElementById("pageTitle");
 
-            if (!isVerified) {
+            if (verified === "1" && started) {
+                sessionStorage.setItem("checkpoint_completed", "true");
+            }
+
+            let sessionValid = sessionStorage.getItem("checkpoint_completed");
+
+            if (!sessionValid) {
                 errorMsg.style.display = "block";
                 getKeyBtn.style.display = "none";
                 title.innerText = "Keysystem Failed";
